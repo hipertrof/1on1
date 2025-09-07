@@ -26,8 +26,10 @@ Personal web application for Digital Products Director managing weekly 1-on-1s w
 Built to replace MS Teams + OneNote workflow with structured, integrated solution.
 User has basic HTML/CSS knowledge, building with Claude Code assistance.
 
-CURRENT STATUS: MVP Phase 1 - Functional & Ready for Testing
-------------------------------------------------------------
+CURRENT STATUS: MVP Phase 1 - Functional & Deployed to GitHub ✅
+----------------------------------------------------------------
+🚀 Repository: https://github.com/hipertrof/1on1.git
+📅 Last commit: September 7, 2025 - Initial MVP commit
 
 KEY ARCHITECTURE DECISIONS MADE
 -------------------------------
