@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1-on-1 Manager</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-brand">
+                <h1>1-on-1 Manager</h1>
+            </div>
+            <div class="nav-menu">
+                <a href="#dashboard" class="nav-link active" data-page="dashboard">Dashboard</a>
+                <a href="#meetings" class="nav-link" data-page="meetings">Meetings</a>
+                <a href="#team" class="nav-link" data-page="team">Team</a>
+                <a href="#roadmap" class="nav-link" data-page="roadmap">Roadmap</a>
+                <a href="#reports" class="nav-link" data-page="reports">Reports</a>
+            </div>
+            <div class="nav-user">
+                <span id="user-name">Digital Products Director</span>
+                <button id="logout-btn" class="btn-secondary">Logout</button>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Dashboard Page -->
+            <div id="dashboard-page" class="page active">
+                <div class="page-header">
+                    <h2>Dashboard</h2>
+                    <button id="new-meeting-btn" class="btn-primary">New Meeting</button>
+                </div>
+                
+                <div class="dashboard-grid">
+                    <!-- Upcoming Meetings -->
+                    <div class="card">
+                        <h3>Upcoming Meetings</h3>
+                        <div id="upcoming-meetings" class="meeting-list">
+                            <!-- Meetings will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- My Action Items -->
+                    <div class="card">
+                        <h3>My Action Items</h3>
+                        <div id="my-tasks" class="task-list">
+                            <!-- Tasks will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Team Overview -->
+                    <div class="card">
+                        <h3>Team Overview</h3>
+                        <div id="team-overview" class="team-grid">
+                            <!-- Team member cards will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meetings Page -->
+            <div id="meetings-page" class="page">
+                <div class="page-header">
+                    <h2>Meetings</h2>
+                    <div class="header-controls">
+                        <select id="team-member-filter">
+                            <option value="">All Team Members</option>
+                            <!-- Team members will be populated here -->
+                        </select>
+                        <button id="schedule-meeting-btn" class="btn-primary">Schedule Meeting</button>
+                    </div>
+                </div>
+                
+                <div id="meetings-list" class="meetings-container">
+                    <!-- Meeting cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Team Management Page -->
+            <div id="team-page" class="page">
+                <div class="page-header">
+                    <h2>Team Management</h2>
+                    <button id="invite-member-btn" class="btn-primary">Invite Team Member</button>
+                </div>
+
+                <!-- Team Filters -->
+                <div class="team-filters">
+                    <div class="search-container">
+                        <input type="text" id="team-search" class="search-input" placeholder="Search team members by name, position, or email...">
+                        <div class="search-filters">
+                            <select id="team-status-filter" class="filter-select">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="pending">Pending</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                            <select id="team-position-filter" class="filter-select">
+                                <option value="">All Positions</option>
+                                <option value="Senior Product Manager">Senior Product Manager</option>
+                                <option value="Product Manager">Product Manager</option>
+                            </select>
+                            <select id="team-access-filter" class="filter-select">
+                                <option value="">All Access Levels</option>
+                                <option value="direct-report">Direct Report</option>
+                                <option value="manager">Manager</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="team-management-grid">
+                    <!-- Current Team Members -->
+                    <div class="card team-members-card">
+                        <h3>Team Members</h3>
+                        <div id="team-members-list" class="team-members-container">
+                            <!-- Team members will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Pending Invitations -->
+                    <div class="card">
+                        <h3>Pending Invitations</h3>
+                        <div id="pending-invitations" class="invitations-container">
+                            <!-- Pending invitations will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Access Control -->
+                    <div class="card">
+                        <h3>Access Control Settings</h3>
+                        <div class="access-settings">
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="allow-agenda-items" checked>
+                                    Allow direct reports to add agenda items before meetings
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="auto-email-summaries" checked>
+                                    Automatically send meeting summaries via email
+                                </label>
+                            </div>
+                            <div class="setting-item">
+                                <label>
+                                    <input type="checkbox" id="readonly-dashboard-access" checked>
+                                    Grant read-only dashboard access to direct reports
+                                </label>
+                            </div>
+                        </div>
+                        <button id="save-access-settings" class="btn-primary">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roadmap Page -->
+            <div id="roadmap-page" class="page">
+                <div class="roadmap-toolbar">
+                    <h2>Product Roadmap</h2>
+                    <div class="roadmap-controls">
+                        <select id="roadmap-view-select">
+                            <option value="gantt">Gantt View</option>
+                            <option value="list">List View</option>
+                            <option value="board">Board View</option>
+                        </select>
+                        <button id="add-theme-btn" class="btn-secondary">Add Theme</button>
+                        <button id="add-epic-btn" class="btn-primary">Add Epic</button>
+                    </div>
+                </div>
+
+                <!-- Search and Filters -->
+                <div class="search-container">
+                    <input type="text" id="roadmap-search" class="search-input" placeholder="Search roadmap items...">
+                    <div class="search-filters">
+                        <select id="priority-filter" class="filter-select">
+                            <option value="">All Priorities</option>
+                            <option value="high">High</option>
+                            <option value="medium">Medium</option>
+                            <option value="low">Low</option>
+                        </select>
+                        <select id="status-filter" class="filter-select">
+                            <option value="">All Statuses</option>
+                            <option value="planning">Planning</option>
+                            <option value="in-progress">In Progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <select id="assignee-filter" class="filter-select">
+                            <option value="">All Assignees</option>
+                            <!-- Team members will be populated here -->
+                        </select>
+                    </div>
+                </div>
+                
+                <div id="roadmap-container" class="roadmap-view">
+                    <!-- Gantt Chart Header -->
+                    <div class="gantt-header">
+                        <div style="width: 300px; font-weight: 500;">Item</div>
+                        <div class="gantt-timeline">
+                            <div class="gantt-month">Sep 2025</div>
+                            <div class="gantt-month">Oct 2025</div>
+                            <div class="gantt-month">Nov 2025</div>
+                            <div class="gantt-month">Dec 2025</div>
+                            <div class="gantt-month">Jan 2026</div>
+                            <div class="gantt-month">Feb 2026</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Roadmap Items will be populated here -->
+                    <div id="roadmap-items-container">
+                        <!-- Items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Meeting Page -->
+            <div id="meeting-session-page" class="page">
+                <div class="meeting-header">
+                    <div class="meeting-title-section">
+                        <h2 id="meeting-session-title">1-on-1 with Team Member</h2>
+                        <div class="meeting-meta">
+                            <span id="meeting-date-time"></span>
+                            <span id="meeting-duration">00:00</span>
+                        </div>
+                    </div>
+                    <div class="meeting-controls">
+                        <button id="save-meeting-progress" class="btn-secondary">Save Progress</button>
+                        <button id="end-meeting-btn" class="btn-primary">End Meeting</button>
+                    </div>
+                </div>
+
+                <div class="meeting-content">
+                    <!-- Meeting Main Content - Side by Side Layout -->
+                    <div class="meeting-main-content">
+                        <!-- Discussion Points Section (2/3 width) -->
+                        <div class="discussion-section">
+                            <div class="section-header">
+                                <h3>Discussion Points</h3>
+                                <button id="add-meeting-point" class="btn-secondary">Add Point</button>
+                            </div>
+                            <div id="discussion-points-list" class="discussion-points-nested">
+                                <!-- Nested discussion points will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Action Items Section (1/3 width) -->
+                        <div class="action-items-section">
+                            <div class="section-header">
+                                <h3>Action Items</h3>
+                                <button id="add-action-item" class="btn-secondary">Add Action Item</button>
+                            </div>
+                            <div id="action-items-list" class="action-items-simple">
+                                <!-- Simple action items will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transcript Upload Section - Now more accessible -->
+                    <div class="meeting-section transcript-section">
+                        <div class="section-header">
+                            <h3>Call Transcript</h3>
+                            <div class="transcript-controls">
+                                <input type="file" id="transcript-file" accept=".txt,.doc,.docx,.pdf" style="display: none;">
+                                <button class="btn-secondary" onclick="document.getElementById('transcript-file').click()">
+                                    📎 Upload Transcript
+                                </button>
+                                <span id="transcript-filename" class="filename-display"></span>
+                            </div>
+                        </div>
+                        <div id="transcript-content" class="transcript-preview">
+                            <!-- Transcript preview will appear here when uploaded -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Page -->
+            <div id="reports-page" class="page">
+                <div class="page-header">
+                    <h2>Reports & Analytics</h2>
+                    <div class="integration-status">
+                        <span class="status-indicator status-disconnected"></span>
+                        <span>Teams Integration</span>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="export-options">
+                    <div class="export-card" onclick="app.exportData('pdf')">
+                        <div class="export-icon">📄</div>
+                        <div class="export-title">PDF Report</div>
+                        <div class="export-description">Comprehensive meeting reports and analytics</div>
+                    </div>
+                    <div class="export-card" onclick="app.exportData('excel')">
+                        <div class="export-icon">📊</div>
+                        <div class="export-title">Excel Spreadsheet</div>
+                        <div class="export-description">Detailed data for further analysis</div>
+                    </div>
+                    <div class="export-card" onclick="app.exportData('csv')">
+                        <div class="export-icon">📋</div>
+                        <div class="export-title">CSV Data</div>
+                        <div class="export-description">Raw data in CSV format</div>
+                    </div>
+                    <div class="export-card" onclick="app.exportData('json')">
+                        <div class="export-icon">🔗</div>
+                        <div class="export-title">JSON Export</div>
+                        <div class="export-description">Complete data backup in JSON format</div>
+                    </div>
+                </div>
+
+                <!-- Analytics Grid -->
+                <div class="analytics-grid">
+                    <div class="chart-container">
+                        <div class="chart-title">Meeting Frequency Trends</div>
+                        <div class="chart-content" id="meeting-frequency-chart">
+                            📈 Meeting frequency chart would appear here
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Action Item Completion Rate</div>
+                        <div class="chart-content" id="completion-rate-chart">
+                            📊 Completion rate chart would appear here
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Team Engagement Metrics</div>
+                        <div class="chart-content" id="engagement-chart">
+                            👥 Team engagement chart would appear here
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <div class="chart-title">Roadmap Progress</div>
+                        <div class="chart-content" id="roadmap-progress-chart">
+                            🎯 Roadmap progress chart would appear here
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Statistics -->
+                <div class="reports-grid">
+                    <div class="card">
+                        <h3>Meeting Statistics</h3>
+                        <div id="detailed-meeting-stats">
+                            <!-- Detailed stats will be populated here -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Action Items Overview</h3>
+                        <div id="action-items-overview">
+                            <!-- Action items overview will be populated here -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Team Performance</h3>
+                        <div id="team-performance-stats">
+                            <!-- Team performance stats will be populated here -->
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Integration Status</h3>
+                        <div id="integration-status">
+                            <div class="integration-status">
+                                <span class="status-indicator status-disconnected"></span>
+                                <span>Microsoft Teams - Not Connected</span>
+                                <button class="btn-primary" onclick="app.connectTeams()">Connect</button>
+                            </div>
+                            <div class="integration-status">
+                                <span class="status-indicator status-disconnected"></span>
+                                <span>Outlook Calendar - Not Connected</span>
+                                <button class="btn-primary" onclick="app.connectOutlook()">Connect</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Invite Team Member Modal -->
+    <div id="invite-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Invite Team Member</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="invite-form">
+                    <div class="form-group">
+                        <label for="member-name">Full Name:</label>
+                        <input type="text" id="member-name" required placeholder="Enter team member's full name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="member-email">Email Address:</label>
+                        <input type="email" id="member-email" required placeholder="Enter team member's email">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="member-position">Position/Title:</label>
+                        <input type="text" id="member-position" required placeholder="e.g., Product Manager, Senior Product Manager">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="access-level">Access Level:</label>
+                        <select id="access-level" required>
+                            <option value="direct-report">Direct Report (Read-only access to their meetings)</option>
+                            <option value="manager">Manager (Full access)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="invitation-message">Personal Message (Optional):</label>
+                        <textarea id="invitation-message" rows="3" placeholder="Add a personal message to the invitation email..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancel-invite">Cancel</button>
+                <button type="submit" form="invite-form" class="btn-primary">Send Invitation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting Modal -->
+    <div id="meeting-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">New Meeting</h3>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="meeting-form">
+                    <div class="form-group">
+                        <label for="team-member">Team Member:</label>
+                        <select id="team-member" required>
+                            <option value="">Select team member...</option>
+                            <!-- Team members will be populated here -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="meeting-date">Meeting Date:</label>
+                        <input type="datetime-local" id="meeting-date" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Standard Questions:</label>
+                        <div class="standard-questions">
+                            <div class="question-item">
+                                <input type="checkbox" id="q1" checked disabled>
+                                <label for="q1">What important meetings are happening this week?</label>
+                            </div>
+                            <div class="question-item">
+                                <input type="checkbox" id="q2" checked disabled>
+                                <label for="q2">Is there anything that needs to be shared with the wider team?</label>
+                            </div>
+                            <div class="question-item">
+                                <input type="checkbox" id="q3" checked disabled>
+                                <label for="q3">Where do you need my help/assistance?</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="discussion-points">Additional Discussion Points:</label>
+                        <div id="discussion-points-container">
+                            <!-- Discussion points will be added dynamically -->
+                        </div>
+                        <button type="button" id="add-discussion-point" class="btn-secondary">Add Discussion Point</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancel-meeting">Cancel</button>
+                <button type="submit" form="meeting-form" class="btn-primary">Save Meeting</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="scripts/meeting-session.js"></script>
+    <script src="scripts/roadmap.js"></script>
+    <script src="scripts/integrations.js"></script>
+    <script src="scripts/analytics.js"></script>
+    <script src="scripts/main.js"></script>
+</body>
+</html>
