@@ -28,29 +28,29 @@ class MeetingSession {
 
     setupEventListeners() {
         // Meeting controls
-        document.getElementById('save-meeting-progress').addEventListener('click', () => {
-            this.saveProgress();
+        document.getElementById('save-meeting-progress').addEventListener('click', async () => {
+            await this.saveProgress();
         });
 
-        document.getElementById('end-meeting-btn').addEventListener('click', () => {
-            this.endMeeting();
+        document.getElementById('end-meeting-btn').addEventListener('click', async () => {
+            await this.endMeeting();
         });
 
         // Add discussion point
-        document.getElementById('add-meeting-point').addEventListener('click', () => {
-            this.addDiscussionPoint();
+        document.getElementById('add-meeting-point').addEventListener('click', async () => {
+            await this.addDiscussionPoint();
         });
 
         // Add action item
-        document.getElementById('add-action-item').addEventListener('click', () => {
-            this.addActionItem();
+        document.getElementById('add-action-item').addEventListener('click', async () => {
+            await this.addActionItem();
         });
 
         // Removed meeting notes - no longer needed
 
         // Transcript upload
-        document.getElementById('transcript-file').addEventListener('change', (e) => {
-            this.handleTranscriptUpload(e);
+        document.getElementById('transcript-file').addEventListener('change', async (e) => {
+            await this.handleTranscriptUpload(e);
         });
     }
 
@@ -200,7 +200,7 @@ class MeetingSession {
         }, 1000);
     }
 
-    addDiscussionPoint() {
+    async addDiscussionPoint() {
         this.meeting.discussionPoints = this.meeting.discussionPoints || [];
         const newPoint = {
             id: `point_${Date.now()}`,
@@ -211,7 +211,7 @@ class MeetingSession {
         };
         this.meeting.discussionPoints.push(newPoint);
         this.loadDiscussionPoints();
-        this.saveProgress();
+        await this.saveProgress();
         
         // Focus on the new textarea
         setTimeout(() => {
@@ -222,7 +222,7 @@ class MeetingSession {
         }, 100);
     }
 
-    addSubDiscussionPoint(parentId) {
+    async addSubDiscussionPoint(parentId) {
         const parent = this.findDiscussionPoint(this.meeting.discussionPoints, parentId);
         
         if (parent) {
@@ -236,7 +236,7 @@ class MeetingSession {
             parent.children.push(newPoint);
             
             this.loadDiscussionPoints();
-            this.saveProgress();
+            await this.saveProgress();
             
             // Focus on the new textarea
             setTimeout(() => {
@@ -261,27 +261,27 @@ class MeetingSession {
         return null;
     }
 
-    toggleDiscussionPoint(pointId) {
+    async toggleDiscussionPoint(pointId) {
         const point = this.findDiscussionPoint(this.meeting.discussionPoints, pointId);
         if (point) {
             point.completed = !point.completed;
             this.loadDiscussionPoints();
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
-    updateDiscussionText(pointId, text) {
+    async updateDiscussionText(pointId, text) {
         const point = this.findDiscussionPoint(this.meeting.discussionPoints, pointId);
         if (point) {
             point.text = text;
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
-    removeDiscussionPoint(pointId) {
+    async removeDiscussionPoint(pointId) {
         this.removeDiscussionPointFromArray(this.meeting.discussionPoints, pointId);
         this.loadDiscussionPoints();
-        this.saveProgress();
+        await this.saveProgress();
     }
 
     removeDiscussionPointFromArray(points, id) {
@@ -297,7 +297,7 @@ class MeetingSession {
         return false;
     }
 
-    addActionItem() {
+    async addActionItem() {
         this.actionItems = this.actionItems || [];
         const newAction = {
             id: `action_${Date.now()}`,
@@ -308,7 +308,7 @@ class MeetingSession {
         };
         this.actionItems.push(newAction);
         this.loadActionItems();
-        this.saveProgress();
+        await this.saveProgress();
         
         // Focus on the new textarea
         setTimeout(() => {
@@ -319,43 +319,43 @@ class MeetingSession {
         }, 100);
     }
 
-    toggleActionItem(actionId) {
+    async toggleActionItem(actionId) {
         const action = this.actionItems.find(item => item.id === actionId);
         if (action) {
             action.completed = !action.completed;
             this.loadActionItems();
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
-    updateActionText(actionId, text) {
+    async updateActionText(actionId, text) {
         const action = this.actionItems.find(item => item.id === actionId);
         if (action) {
             action.description = text;
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
-    updateActionAssignee(actionId, assignee) {
+    async updateActionAssignee(actionId, assignee) {
         const action = this.actionItems.find(item => item.id === actionId);
         if (action) {
             action.assignee = assignee;
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
-    removeActionItem(actionId) {
+    async removeActionItem(actionId) {
         const index = this.actionItems.findIndex(item => item.id === actionId);
         if (index !== -1) {
             this.actionItems.splice(index, 1);
             this.loadActionItems();
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
     // Old index-based methods removed - now using ID-based methods
 
-    handleTranscriptUpload(event) {
+    async handleTranscriptUpload(event) {
         const file = event.target.files[0];
         if (file) {
             this.transcriptFile = file;
@@ -378,52 +378,100 @@ class MeetingSession {
             reader.readAsText(file);
             
             this.meeting.transcriptFileName = file.name;
-            this.saveProgress();
+            await this.saveProgress();
         }
     }
 
-    saveProgress() {
-        // No longer using meeting notes - they were removed
-        this.meeting.lastModified = new Date().toISOString();
-        
-        // Save action items to main app
-        this.actionItems.forEach(item => {
-            if (item.description.trim()) {
-                this.app.tasks.push({
-                    ...item,
-                    meetingId: this.meetingId,
-                    assigneeId: item.assignee
-                });
+    async saveProgress() {
+        try {
+            // No longer using meeting notes - they were removed
+            this.meeting.lastModified = new Date().toISOString();
+            
+            // Update meeting in database via API
+            await apiService.updateMeeting(this.meetingId, {
+                discussionPoints: this.meeting.discussionPoints,
+                lastModified: this.meeting.lastModified
+            });
+            
+            // Save action items to database
+            for (const item of this.actionItems) {
+                if (item.description.trim()) {
+                    const actionData = {
+                        description: item.description,
+                        assignee: item.assignee,
+                        completed: item.completed
+                    };
+                    
+                    if (item.id.startsWith('action_')) {
+                        // New action item - create in database
+                        const savedAction = await apiService.createActionItem(this.meetingId, actionData);
+                        // Update local copy with database ID
+                        item.id = savedAction.id;
+                        this.app.tasks.push({
+                            ...savedAction,
+                            meetingId: this.meetingId,
+                            assigneeId: item.assignee
+                        });
+                    } else {
+                        // Existing action item - update in database
+                        await apiService.updateActionItem(item.id, actionData);
+                        // Update in main app tasks array
+                        const taskIndex = this.app.tasks.findIndex(t => t.id === item.id);
+                        if (taskIndex !== -1) {
+                            Object.assign(this.app.tasks[taskIndex], actionData);
+                        }
+                    }
+                }
             }
-        });
 
-        // Save to localStorage
-        this.app.saveData();
-        
-        // Show saved indicator
-        this.app.showNotification('Progress saved');
+            // Also save to localStorage as backup
+            this.app.saveToLocalStorage();
+            
+            // Show saved indicator
+            this.app.showNotification('Progress saved');
+            
+        } catch (error) {
+            console.error('Failed to save meeting progress:', error);
+            // Fallback to localStorage only
+            this.app.saveToLocalStorage();
+            this.app.showNotification('Progress saved (offline)', 'warning');
+        }
     }
 
-    endMeeting() {
+    async endMeeting() {
         if (confirm('End this meeting? All progress will be saved and a summary will be generated.')) {
-            // Clear duration timer
-            if (this.durationInterval) {
-                clearInterval(this.durationInterval);
+            try {
+                // Clear duration timer
+                if (this.durationInterval) {
+                    clearInterval(this.durationInterval);
+                }
+
+                // Mark meeting as completed
+                this.meeting.completed = true;
+                this.meeting.endTime = new Date().toISOString();
+                this.meeting.duration = this.currentDuration;
+                
+                // Final save to database
+                await apiService.updateMeeting(this.meetingId, {
+                    completed: true,
+                    endTime: this.meeting.endTime,
+                    duration: this.meeting.duration,
+                    discussionPoints: this.meeting.discussionPoints
+                });
+                
+                // Final save
+                await this.saveProgress();
+
+                // Generate meeting summary
+                this.generateMeetingSummary();
+
+                // Return to meetings page
+                this.app.showPage('meetings');
+                
+            } catch (error) {
+                console.error('Failed to end meeting:', error);
+                this.app.showNotification('Failed to save meeting. Please try again.', 'error');
             }
-
-            // Mark meeting as completed
-            this.meeting.completed = true;
-            this.meeting.endTime = new Date().toISOString();
-            this.meeting.duration = this.currentDuration;
-            
-            // Final save
-            this.saveProgress();
-
-            // Generate meeting summary
-            this.generateMeetingSummary();
-
-            // Return to meetings page
-            this.app.showPage('meetings');
         }
     }
 

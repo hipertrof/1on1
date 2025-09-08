@@ -2,16 +2,7 @@
 class OneOnOneManager {
     constructor() {
         this.currentUser = null;
-        this.teamMembers = [
-            { id: 1, name: 'Sarah Chen', email: 'sarah.chen@company.com', position: 'Senior Product Manager', nextMeeting: '2025-09-08 14:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 2, name: 'Mike Rodriguez', email: 'mike.rodriguez@company.com', position: 'Product Manager', nextMeeting: '2025-09-08 15:30', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 3, name: 'Emily Johnson', email: 'emily.johnson@company.com', position: 'Product Manager', nextMeeting: '2025-09-09 10:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 4, name: 'David Kim', email: 'david.kim@company.com', position: 'Senior Product Manager', nextMeeting: '2025-09-09 14:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 5, name: 'Lisa Thompson', email: 'lisa.thompson@company.com', position: 'Product Manager', nextMeeting: '2025-09-10 11:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 6, name: 'James Wilson', email: 'james.wilson@company.com', position: 'Product Manager', nextMeeting: '2025-09-10 15:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 7, name: 'Maria Garcia', email: 'maria.garcia@company.com', position: 'Senior Product Manager', nextMeeting: '2025-09-11 13:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' },
-            { id: 8, name: 'Robert Brown', email: 'robert.brown@company.com', position: 'Product Manager', nextMeeting: '2025-09-11 16:00', status: 'active', accessLevel: 'direct-report', invitedAt: '2025-09-01', joinedAt: '2025-09-01' }
-        ];
+        this.teamMembers = [];
         this.pendingInvitations = [];
         this.meetings = [];
         this.tasks = [];
@@ -26,13 +17,11 @@ class OneOnOneManager {
         this.roadmapManager = new RoadmapManager(this);
         this.integrationManager = new IntegrationManager(this);
         this.analyticsManager = new AnalyticsManager(this);
-        
-        this.init();
     }
 
-    init() {
+    async init() {
         this.setupEventListeners();
-        this.loadInitialData();
+        await this.loadInitialData();
         this.showPage('dashboard');
     }
 
@@ -92,9 +81,9 @@ class OneOnOneManager {
         });
 
         // Meeting form submission
-        document.getElementById('meeting-form').addEventListener('submit', (e) => {
+        document.getElementById('meeting-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            this.saveMeeting();
+            await this.saveMeeting();
         });
 
         // Team management buttons
@@ -103,9 +92,9 @@ class OneOnOneManager {
         });
 
         // Invite form submission
-        document.getElementById('invite-form').addEventListener('submit', (e) => {
+        document.getElementById('invite-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            this.sendInvitation();
+            await this.sendInvitation();
         });
 
         // Access settings
@@ -477,48 +466,83 @@ class OneOnOneManager {
         container.appendChild(pointDiv);
     }
 
-    saveMeeting() {
-        const form = document.getElementById('meeting-form');
-        const formData = new FormData(form);
-        
-        const teamMemberId = parseInt(document.getElementById('team-member').value);
-        const meetingDate = document.getElementById('meeting-date').value;
-        
-        // Get discussion points
-        const discussionPoints = Array.from(document.querySelectorAll('.discussion-point input'))
-            .map(input => ({ text: input.value, completed: false }))
-            .filter(point => point.text.trim());
+    async saveMeeting() {
+        try {
+            const form = document.getElementById('meeting-form');
+            const formData = new FormData(form);
+            
+            const teamMemberId = parseInt(document.getElementById('team-member').value);
+            const meetingDate = document.getElementById('meeting-date').value;
+            
+            // Get discussion points
+            const discussionPoints = Array.from(document.querySelectorAll('.discussion-point input'))
+                .map(input => ({ text: input.value, completed: false }))
+                .filter(point => point.text.trim());
 
-        const meeting = {
-            id: Date.now(),
-            teamMemberId,
-            date: meetingDate,
-            discussionPoints,
-            standardQuestions: [
-                { text: 'What important meetings are happening this week?', completed: false },
-                { text: 'Is there anything that needs to be shared with the wider team?', completed: false },
-                { text: 'Where do you need my help/assistance?', completed: false }
-            ],
-            notes: '',
-            completed: false,
-            createdAt: new Date().toISOString()
-        };
+            const meetingData = {
+                teamMemberId,
+                date: meetingDate,
+                discussionPoints,
+                standardQuestions: [
+                    { text: 'What important meetings are happening this week?', completed: false },
+                    { text: 'Is there anything that needs to be shared with the wider team?', completed: false },
+                    { text: 'Where do you need my help/assistance?', completed: false }
+                ],
+                notes: '',
+                completed: false
+            };
 
-        this.meetings.push(meeting);
-        this.hideModal('meeting-modal');
-        this.showPage('dashboard'); // Refresh dashboard
-        
-        // Show success message
-        this.showNotification('Meeting scheduled successfully!');
+            // Save to database via API
+            const savedMeeting = await apiService.createMeeting(meetingData);
+            this.meetings.push(savedMeeting);
+            
+            // Also save to localStorage as backup
+            this.saveToLocalStorage();
+            
+            this.hideModal('meeting-modal');
+            this.showPage('dashboard'); // Refresh dashboard
+            
+            // Show success message
+            this.showNotification('Meeting scheduled successfully!');
+            
+        } catch (error) {
+            console.error('Failed to save meeting:', error);
+            this.showNotification('Failed to save meeting. Please try again.', 'error');
+        }
     }
 
-    showNotification(message) {
+    showNotification(message, type = 'success') {
         // Simple notification - can be enhanced later
+        if (type === 'error') {
+            console.error(message);
+        }
         alert(message);
     }
 
-    loadInitialData() {
-        // Load any saved data from localStorage
+    async loadInitialData() {
+        try {
+            // Load data from API
+            this.teamMembers = await apiService.getAllUsers();
+            this.meetings = await apiService.getAllMeetings();
+            
+            // Load tasks from all meetings
+            this.tasks = [];
+            for (const meeting of this.meetings) {
+                const actionItems = await apiService.getActionItemsByMeeting(meeting.id);
+                this.tasks.push(...actionItems);
+            }
+            
+            // Set current user (manager)
+            this.currentUser = this.teamMembers.find(user => user.role === 'manager');
+            
+        } catch (error) {
+            console.error('Failed to load initial data:', error);
+            // Fallback to localStorage for offline mode
+            this.loadFromLocalStorage();
+        }
+    }
+
+    loadFromLocalStorage() {
         const savedMeetings = localStorage.getItem('meetings');
         const savedTasks = localStorage.getItem('tasks');
         const savedTeamMembers = localStorage.getItem('teamMembers');
@@ -546,12 +570,17 @@ class OneOnOneManager {
         }
     }
 
-    saveData() {
+    saveToLocalStorage() {
         localStorage.setItem('meetings', JSON.stringify(this.meetings));
         localStorage.setItem('tasks', JSON.stringify(this.tasks));
         localStorage.setItem('teamMembers', JSON.stringify(this.teamMembers));
         localStorage.setItem('pendingInvitations', JSON.stringify(this.pendingInvitations));
         localStorage.setItem('accessSettings', JSON.stringify(this.accessSettings));
+    }
+
+    // Legacy method for backwards compatibility
+    saveData() {
+        this.saveToLocalStorage();
     }
 
     // Meeting session functionality
@@ -578,12 +607,27 @@ class OneOnOneManager {
         // TODO: Implement notes viewer
     }
 
-    toggleTask(taskId) {
-        const task = this.tasks.find(t => t.id === taskId);
-        if (task) {
-            task.completed = !task.completed;
-            this.saveData();
-            this.loadMyTasks();
+    async toggleTask(taskId) {
+        try {
+            const task = this.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                
+                // Update in database via API
+                await apiService.updateActionItem(taskId, { completed: task.completed });
+                
+                // Also save to localStorage as backup
+                this.saveToLocalStorage();
+                this.loadMyTasks();
+            }
+        } catch (error) {
+            console.error('Failed to toggle task:', error);
+            // Revert the change on error
+            const task = this.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+            }
+            this.showNotification('Failed to update task. Please try again.', 'error');
         }
     }
 
@@ -678,31 +722,40 @@ class OneOnOneManager {
         modal.classList.add('active');
     }
 
-    sendInvitation() {
-        const name = document.getElementById('member-name').value;
-        const email = document.getElementById('member-email').value;
-        const position = document.getElementById('member-position').value;
-        const accessLevel = document.getElementById('access-level').value;
-        const message = document.getElementById('invitation-message').value;
+    async sendInvitation() {
+        try {
+            const name = document.getElementById('member-name').value;
+            const email = document.getElementById('member-email').value;
+            const position = document.getElementById('member-position').value;
+            const accessLevel = document.getElementById('access-level').value;
+            const message = document.getElementById('invitation-message').value;
 
-        const invitation = {
-            id: Date.now(),
-            name,
-            email,
-            position,
-            accessLevel,
-            message,
-            invitedAt: new Date().toISOString(),
-            status: 'pending'
-        };
+            const userData = {
+                name,
+                email,
+                position,
+                role: 'team-member',
+                status: 'pending',
+                accessLevel,
+                invitationMessage: message
+            };
 
-        this.pendingInvitations.push(invitation);
-        this.saveData();
-        this.hideModal('invite-modal');
-        this.loadPendingInvitations();
-        
-        // Simulate sending email (in real app, this would call your email service)
-        this.showNotification(`Invitation sent to ${email}!`);
+            // Create user via API (this will handle the invitation)
+            const newUser = await apiService.createUser(userData);
+            this.teamMembers.push(newUser);
+            
+            // Also save to localStorage as backup
+            this.saveToLocalStorage();
+            
+            this.hideModal('invite-modal');
+            this.loadTeamManagement(); // Refresh team management page
+            
+            this.showNotification(`Invitation sent to ${email}!`);
+            
+        } catch (error) {
+            console.error('Failed to send invitation:', error);
+            this.showNotification('Failed to send invitation. Please try again.', 'error');
+        }
     }
 
     saveAccessSettings() {
@@ -1007,6 +1060,7 @@ class OneOnOneManager {
 }
 
 // Initialize the application when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     window.app = new OneOnOneManager();
+    await window.app.init();
 });

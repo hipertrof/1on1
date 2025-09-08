@@ -3,7 +3,10 @@
 
 class ApiService {
     constructor() {
-        this.baseUrl = '/api';
+        // Use port 3001 for development, relative path for production
+        this.baseUrl = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001/api' 
+            : '/api';
     }
 
     async request(endpoint, options = {}) {
